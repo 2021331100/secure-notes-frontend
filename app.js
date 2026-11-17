@@ -1,6 +1,8 @@
 const DEFAULT_API='https://secure-notes-api-u0nq.onrender.com';
 const $=s=>document.querySelector(s);
-const state={token:localStorage.getItem('sn_token'),user:JSON.parse(localStorage.getItem('sn_user')||'null'),notePage:1,userPage:1,allPage:1,editingNote:null,editingUser:null};
+let storedUser=null;
+try{storedUser=JSON.parse(localStorage.getItem('sn_user')||'null');}catch(error){localStorage.removeItem('sn_user');localStorage.removeItem('sn_token');}
+const state={token:localStorage.getItem('sn_token'),user:storedUser,notePage:1,userPage:1,allPage:1,editingNote:null,editingUser:null};
 const apiBase=()=>($('#api-url')?.value.trim().replace(/\/$/,'')||DEFAULT_API);
 function authHeaders(){return {'Content-Type':'application/json',...(state.token?{Authorization:'Bearer '+state.token}:{})};}
 async function request(path,options={}){let res;try{res=await fetch(apiBase()+path,{...options,headers:{...authHeaders(),...(options.headers||{})}});}catch(e){throw new Error('Cannot connect to API. Check your internet or backend URL.');}if(res.status===204)return null;let data={};try{data=await res.json();}catch{}if(!res.ok)throw new Error(data.message||data.error||'Request failed ('+res.status+').');return data;}
@@ -9,7 +11,10 @@ function showError(id,msg){const el=$(id);el.textContent=msg;el.classList.remove
 function saveSession(data){state.token=data.token;state.user=data.user;localStorage.setItem('sn_token',state.token);localStorage.setItem('sn_user',JSON.stringify(state.user));boot();}
 function clearSession(){state.token=null;state.user=null;localStorage.removeItem('sn_token');localStorage.removeItem('sn_user');boot();}
 function switchAuth(which){document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===which));$('#login-form').classList.toggle('hidden',which!=='login');$('#admin-login-form').classList.toggle('hidden',which!=='admin');$('#register-form').classList.toggle('hidden',which!=='register');$('#auth-error').classList.add('hidden');}
-document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>switchAuth(b.dataset.tab)));
+document.addEventListener('click',event=>{
+  const tab=event.target.closest('.tab[data-tab]');
+  if(tab)switchAuth(tab.dataset.tab);
+});
 $('#login-form').addEventListener('submit',async e=>{e.preventDefault();const f=new FormData(e.currentTarget);try{const d=await request('/api/auth/login',{method:'POST',body:JSON.stringify({email:f.get('email'),password:f.get('password')})});saveSession(d);}catch(err){showError('#auth-error',err.message);}});
 $('#admin-login-form').addEventListener('submit',async e=>{e.preventDefault();const f=new FormData(e.currentTarget);try{const d=await request('/api/auth/login',{method:'POST',body:JSON.stringify({email:f.get('email'),password:f.get('password')})});if(d.user?.role!=='admin'){showError('#auth-error','Access denied. This account does not have administrator privileges.');return;}saveSession(d);}catch(err){showError('#auth-error',err.message);}});
 $('#register-form').addEventListener('submit',async e=>{e.preventDefault();const f=new FormData(e.currentTarget);const interests=String(f.get('interests')||'').split(',').map(x=>x.trim()).filter(Boolean);try{const d=await request('/api/auth/register',{method:'POST',body:JSON.stringify({name:f.get('name'),email:f.get('email'),password:f.get('password'),interests})});saveSession(d);}catch(err){showError('#auth-error',err.message);}});
