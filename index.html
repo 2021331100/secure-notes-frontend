@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#101828"><title>Secure Notes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="topbar"><a class="brand" href="#"><span class="logo">N</span>Secure<span>Notes</span></a><div id="account" class="account hidden"><span id="who"></span><button id="logout" class="btn btn-quiet">Log out</button></div></header>
+<main class="wrap">
+<section id="auth" class="auth-grid">
+ <div class="hero"><div class="eyebrow"><i></i> YOUR PRIVATE WORKSPACE</div><h1>Thoughts worth<br><em>keeping safe.</em></h1><p>A clean, simple place for your notes. Sign in to continue, or create an account in seconds.</p><ul><li>Private notes for every user</li><li>JWT-based authentication</li><li>Role-based admin controls</li></ul><small>SECURE NOTES · ASSIGNMENT PROJECT</small></div>
+ <div class="panel auth-panel"><div class="tabs"><button class="tab active" data-tab="login">Sign in</button><button class="tab" data-tab="register">Create account</button></div>
+ <form id="login-form"><h2>Welcome back</h2><p class="muted">Enter your account details to continue.</p><label>Email address<input name="email" type="email" placeholder="you@example.com" required></label><label>Password<input name="password" type="password" placeholder="Your password" required></label><button class="btn btn-primary full">Sign in <span>→</span></button></form>
+ <form id="register-form" class="hidden"><h2>Create your account</h2><p class="muted">Your private space starts here.</p><label>Full name<input name="name" required minlength="2" placeholder="Your name"></label><label>Email address<input name="email" type="email" required placeholder="you@example.com"></label><label>Password<input name="password" type="password" required minlength="6" placeholder="At least 6 characters"></label><label>Interests <small>(comma separated)</small><input name="interests" placeholder="coding, reading"></label><button class="btn btn-primary full">Create account <span>→</span></button></form>
+ <div id="auth-error" class="notice hidden"></div><div class="api-config"><label>API base URL<input id="api-url" value="https://secure-notes-api-u0nq.onrender.com" spellcheck="false"></label><small>Change this only if your backend URL is different.</small></div></div>
+</section>
+<section id="app" class="hidden">
+ <div class="welcome"><div><div class="eyebrow"><i></i> YOUR WORKSPACE</div><h1 id="greeting">Your notes</h1><p class="muted">Keep important thoughts in one secure place.</p></div><button id="new-note" class="btn btn-primary">＋ New note</button></div>
+ <div class="stats"><div class="stat"><span>YOUR NOTES</span><strong id="note-count">0</strong></div><div class="stat"><span>ACCOUNT ROLE</span><strong id="role-label">User</strong></div><div class="stat"><span>ACCOUNT STATUS</span><strong class="online">● Active</strong></div></div>
+ <nav id="app-tabs" class="app-tabs"><button class="selected" data-page="notes-page">My notes</button><button id="admin-tab" class="hidden" data-page="admin-page">Admin panel</button></nav>
+ <section id="notes-page"><div class="section-head"><div><h2>All notes</h2><p class="muted">Only you can see and manage your notes.</p></div><div class="pager"><button id="notes-prev" class="btn btn-quiet">←</button><span id="notes-page-label">Page 1</span><button id="notes-next" class="btn btn-quiet">→</button></div></div><div id="notes-list" class="notes-grid"></div><div id="empty-notes" class="empty hidden"><div>✎</div><h3>No notes yet</h3><p>Create your first note to get started.</p><button class="btn btn-primary" id="empty-create">Create a note</button></div></section>
+ <section id="admin-page" class="hidden"><div class="section-head"><div><h2>Administration</h2><p class="muted">Manage accounts and review notes across the platform.</p></div><button id="add-user" class="btn btn-primary">＋ Add user</button></div>
+ <div class="admin-cards"><article class="panel"><div class="section-head"><h3>Users</h3><div class="pager"><button id="users-prev" class="btn btn-quiet">←</button><span id="users-page-label">Page 1</span><button id="users-next" class="btn btn-quiet">→</button></div></div><div class="table-wrap"><table><thead><tr><th>NAME</th><th>EMAIL</th><th>ROLE</th><th>ACTIONS</th></tr></thead><tbody id="users-body"></tbody></table></div></article>
+ <article class="panel"><div class="section-head"><h3>Interest groups</h3><button id="load-groups" class="btn btn-quiet">Refresh</button></div><div id="groups" class="groups muted">Load groups to view interests.</div></article></div>
+ <article class="panel admin-notes"><div class="section-head"><div><h3>All platform notes</h3><p class="muted">Notes from every user.</p></div><div class="pager"><button id="all-prev" class="btn btn-quiet">←</button><span id="all-page-label">Page 1</span><button id="all-next" class="btn btn-quiet">→</button></div></div><div id="all-notes" class="all-notes"></div></article>
+ </section>
+</section>
+</main>
+<div id="modal" class="modal hidden"><div class="modal-card"><button id="close-modal" class="close">×</button><h2 id="modal-title">New note</h2><form id="note-form"><label>Title<input name="title" required minlength="2" maxlength="200" placeholder="A clear title"></label><label>Content<textarea name="content" required minlength="5" rows="6" placeholder="Write your thoughts..."></textarea></label><div class="modal-actions"><button type="button" id="cancel-modal" class="btn btn-quiet">Cancel</button><button class="btn btn-primary">Save note</button></div></form></div></div>
+<div id="user-modal" class="modal hidden"><div class="modal-card"><button id="close-user-modal" class="close">×</button><h2 id="user-modal-title">Add user</h2><form id="user-form"><label>Name<input name="name" required minlength="2"></label><label>Email<input name="email" type="email" required></label><label>Password<input name="password" type="password" minlength="6" placeholder="Required for new users"></label><label>Role<select name="role"><option value="user">User</option><option value="admin">Admin</option></select></label><label>Interests <small>(comma separated)</small><input name="interests" placeholder="coding, reading"></label><div class="modal-actions"><button type="button" id="cancel-user-modal" class="btn btn-quiet">Cancel</button><button class="btn btn-primary">Save user</button></div></form></div></div>
+<div id="toast" class="toast hidden"></div>
+<footer>SecureNotes <span>·</span> A secure note-taking application</footer>
+<script src="app.js"></script>
+</body></html>
